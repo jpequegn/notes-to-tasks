@@ -1,0 +1,20 @@
+{
+  "description": "notes-to-tasks MCP server — task CRUD via typed tool calls",
+  "setup": "Run `python server.py --install` to add this to .claude/mcp.json automatically",
+  "manual_config": {
+    "mcpServers": {
+      "notes-to-tasks": {
+        "command": "python",
+        "args": ["/absolute/path/to/implementations/A-mcp-server/server.py"],
+        "description": "Local task CRUD server for notes-to-tasks"
+      }
+    }
+  },
+  "tools": [
+    "list_tasks",
+    "create_task",
+    "update_task",
+    "complete_task",
+    "score_tasks"
+  ]
+}
