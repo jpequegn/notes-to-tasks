@@ -11,8 +11,8 @@ effort: 4
 created_date: "2026-02-26"
 updated_date: "2026-02-26"
 due_date: "2026-02-28"
-labels: "[]"
-dependencies: "[]"
+labels: []
+dependencies: []
 source: "[[2026-02-26-project-kickoff]]"
 confidence: 1.0
 ---

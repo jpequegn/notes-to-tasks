@@ -23,7 +23,7 @@ cat tasks/TASK-001.md
 
 ## Picking the next task
 
-1. Run `python daily-brief.py` to see today's priorities
+1. Run `python3 daily-brief.py` to see today's priorities
 2. Pick the highest-score task with `status: todo` and no unresolved `dependencies`
 3. Set `status: in-progress` in the frontmatter before starting
 4. Work on it
@@ -62,7 +62,7 @@ confidence: 1.0
 ## Notes
 ```
 
-Then run: `python ../../scripts/score_tasks.py --impl B`
+Then run: `python3 ../../scripts/score_tasks.py --impl B`
 
 ## Extracting tasks from a meeting note
 

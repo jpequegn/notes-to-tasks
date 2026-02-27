@@ -20,13 +20,13 @@ Fill in after testing. Score each criterion 1–5.
 
 | Criterion | A (MCP Server) | B (Pure Markdown) | C (Backlog.md) |
 |---|---|---|---|
-| Setup time | 3 | | |
-| Agent compatibility | 4 | | |
-| Task query speed | 5 | | |
-| Schema integrity | 5 | | |
-| Team friction | 3 | | |
-| Observability | 3 | | |
-| **Weighted total** | **3.85** | | |
+| Setup time | 3 | 5 | |
+| Agent compatibility | 4 | 5 | |
+| Task query speed | 5 | 3 | |
+| Schema integrity | 5 | 4 | |
+| Team friction | 3 | 5 | |
+| Observability | 3 | 5 | |
+| **Weighted total** | **3.85** | **4.50** | |
 
 ## Observations
 
@@ -58,12 +58,25 @@ Fill in after testing. Score each criterion 1–5.
 ### Implementation B — Pure Markdown
 
 **What worked:**
+- Zero setup — no dependencies, no server, works immediately with any agent or editor
+- `daily-brief.py` produces a clear priority view with score bars, due-date indicators, and per-assignee/status filters (`--assignee`, `--limit`, `--all`, `--status`)
+- `extract_tasks.py` correctly routes high-confidence tasks to `tasks/` and low-confidence ones to `flagged/` (tested: vague "we should" item → confidence 0.65 → flagged)
+- Tasks are human-readable in any text editor or Obsidian — no tooling required to audit
+- Two real meeting notes extracted end-to-end: 10 tasks in queue, scored and prioritised
 
 **What didn't:**
+- `render_frontmatter` had a round-trip bug: list fields (e.g. `labels`) were written as JSON strings, which then got double-quoted on the next scoring pass, producing invalid YAML that `yaml.safe_load` rejected → tasks silently skipped. Fixed in this PR.
+- All tasks clustering at score 3.6 makes priority ordering meaningless until LLM scoring is wired up — heuristics need more signal
 
 **Surprise findings:**
+- The `parse_frontmatter` fallback parser (`HAS_YAML=False`) was slightly different from the yaml path, hiding the round-trip bug — both paths now share `_minimal_yaml_parse()`
+- `daily-brief.py --all` shows done tasks which is noisy; a `--status todo` default is already the right call
 
 **Best suited for:**
+- Solo developers and 1–3 person teams
+- Any agent without MCP support (Gemini CLI, Pi, Codex)
+- Teams that want tasks to live alongside code in a plain markdown repo
+- The "zero to first task in 60 seconds" use case
 
 ---
 

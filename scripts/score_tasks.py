@@ -69,37 +69,64 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
         try:
             fm = yaml.safe_load(fm_text) or {}  # type: ignore[possibly-undefined]
         except yaml.YAMLError:  # type: ignore[possibly-undefined]
-            fm = {}
+            fm = _minimal_yaml_parse(fm_text)
     else:
-        # Minimal YAML parser for key: value pairs
-        fm = {}
-        for line in fm_text.splitlines():
-            m = re.match(r'^(\w[\w_-]*):\s*(.+)$', line)
-            if m:
-                key, val = m.group(1), m.group(2).strip().strip('"\'')
-                if val.lower() == "null":
-                    fm[key] = None
-                elif re.match(r'^\d+\.\d+$', val):
-                    fm[key] = float(val)
-                elif re.match(r'^\d+$', val):
-                    fm[key] = int(val)
-                else:
-                    fm[key] = val
+        fm = _minimal_yaml_parse(fm_text)
 
     return fm, body
 
 
+def _minimal_yaml_parse(fm_text: str) -> dict:
+    """Minimal YAML parser for key: value pairs; handles JSON-array strings."""
+    import json as _json
+    fm: dict = {}
+    for line in fm_text.splitlines():
+        m = re.match(r'^(\w[\w_-]*):\s*(.*)$', line)
+        if not m:
+            continue
+        key = m.group(1)
+        raw = m.group(2).strip()
+        # JSON array value (may or may not be quoted)
+        inner = raw.strip('"\'')
+        if inner.startswith("[") and inner.endswith("]"):
+            try:
+                fm[key] = _json.loads(inner)
+                continue
+            except ValueError:
+                pass
+        if raw.lower() in ("null", "~", ""):
+            fm[key] = None
+        elif re.match(r'^-?\d+\.\d+$', raw):
+            fm[key] = float(raw)
+        elif re.match(r'^-?\d+$', raw):
+            fm[key] = int(raw)
+        else:
+            fm[key] = raw.strip('"\'')
+    return fm
+
+
 def render_frontmatter(fm: dict) -> str:
     """Render frontmatter dict back to YAML string."""
+    import json as _json
     lines = []
     for key, val in fm.items():
         if val is None:
             lines.append(f"{key}: null")
-        elif isinstance(val, str):
-            lines.append(f'{key}: "{val}"')
         elif isinstance(val, list):
-            import json
-            lines.append(f"{key}: {json.dumps(val)}")
+            lines.append(f"{key}: {_json.dumps(val)}")
+        elif isinstance(val, str):
+            # Guard: if a string looks like a JSON array (corrupted round-trip),
+            # parse it back to a list and emit properly.
+            stripped = val.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                try:
+                    parsed = _json.loads(stripped)
+                    if isinstance(parsed, list):
+                        lines.append(f"{key}: {_json.dumps(parsed)}")
+                        continue
+                except ValueError:
+                    pass
+            lines.append(f'{key}: "{val}"')
         elif isinstance(val, float):
             lines.append(f"{key}: {val:.1f}")
         else:
