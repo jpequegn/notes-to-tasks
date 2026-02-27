@@ -46,6 +46,15 @@ python3 scripts/score_tasks.py --dry-run
 python3 implementations/B-pure-markdown/daily-brief.py
 ```
 
+## Documentation
+
+| Doc | What's in it |
+|---|---|
+| `docs/USAGE.md` | Create / update / delete tasks in each implementation + vault insight prompts |
+| `docs/EVALUATION.md` | Comparison matrix, scenario results, final recommendation |
+| `SCHEMA.md` | Canonical task frontmatter spec |
+| `AGENTS.md` | Universal agent instructions |
+
 ## Evaluation
 
 After running all 3 implementations, see `docs/EVALUATION.md` for the comparison matrix.

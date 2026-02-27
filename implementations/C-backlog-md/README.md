@@ -74,6 +74,11 @@ alongside the AI scoring layer (`python3 scorer.py`).
 The `scorer.py` script reads tasks from `backlog/` and adds a `score` field using the same
 formula as the other implementations: `(urgency × 0.4) + (impact × 0.4) - (effort × 0.2)`.
 
+## Full usage guide
+
+See [`docs/USAGE.md — Implementation C`](../../docs/USAGE.md#implementation-c--backlogmd) for
+detailed create / update / delete examples and vault insight prompt templates.
+
 ## Trade-offs vs other implementations
 
 - **Most features** — Kanban UI, MCP, native Claude Code integration
