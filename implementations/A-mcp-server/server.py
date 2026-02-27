@@ -84,10 +84,22 @@ def render_frontmatter(fm: dict) -> str:
     for key, val in fm.items():
         if val is None:
             lines.append(f"{key}: null")
-        elif isinstance(val, str):
-            lines.append(f'{key}: "{val}"')
         elif isinstance(val, list):
             lines.append(f"{key}: {json.dumps(val)}")
+        elif isinstance(val, str):
+            # Guard: if a string looks like a JSON array (corrupted round-trip),
+            # parse it back to a list and emit properly.
+            stripped = val.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                try:
+                    import json as _j
+                    parsed = _j.loads(stripped)
+                    if isinstance(parsed, list):
+                        lines.append(f"{key}: {json.dumps(parsed)}")
+                        continue
+                except ValueError:
+                    pass
+            lines.append(f'{key}: "{val}"')
         elif isinstance(val, float):
             lines.append(f"{key}: {val:.1f}")
         else:
