@@ -345,14 +345,18 @@ TOOLS = [
 
 def run_server():
     if not HAS_MCP:
-        print("Error: mcp package not installed. Run: pip install mcp", file=sys.stderr)
+        print("Error: mcp package not installed. Run: pip3 install mcp pyyaml", file=sys.stderr)
         sys.exit(1)
 
     server = Server("notes-to-tasks")
 
     @server.list_tools()
     async def list_tools():
-        return [Tool(**t) for t in TOOLS]
+        return [Tool(
+            name=t["name"],
+            description=t["description"],
+            inputSchema=t["inputSchema"],
+        ) for t in TOOLS]
 
     @server.call_tool()
     async def call_tool(name: str, arguments: dict):
@@ -370,7 +374,16 @@ def run_server():
         return [TextContent(type="text", text=result)]
 
     import asyncio
-    asyncio.run(stdio_server(server))
+
+    async def _main():
+        async with stdio_server() as (read_stream, write_stream):
+            await server.run(
+                read_stream,
+                write_stream,
+                server.create_initialization_options(),
+            )
+
+    asyncio.run(_main())
 
 
 def install():

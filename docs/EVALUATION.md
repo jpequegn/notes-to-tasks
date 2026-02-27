@@ -20,25 +20,38 @@ Fill in after testing. Score each criterion 1–5.
 
 | Criterion | A (MCP Server) | B (Pure Markdown) | C (Backlog.md) |
 |---|---|---|---|
-| Setup time | | | |
-| Agent compatibility | | | |
-| Task query speed | | | |
-| Schema integrity | | | |
-| Team friction | | | |
-| Observability | | | |
-| **Weighted total** | | | |
+| Setup time | 3 | | |
+| Agent compatibility | 4 | | |
+| Task query speed | 5 | | |
+| Schema integrity | 5 | | |
+| Team friction | 3 | | |
+| Observability | 3 | | |
+| **Weighted total** | **3.85** | | |
 
 ## Observations
 
 ### Implementation A — MCP Server
 
 **What worked:**
+- All 5 MCP tools (`list_tasks`, `create_task`, `update_task`, `complete_task`, `score_tasks`) function correctly
+- `list_tasks` filters by status, assignee, label, min_score, max_score — all verified
+- Tasks sorted by score descending automatically
+- `score_tasks` delegates to `scripts/score_tasks.py --impl A` cleanly
+- `--install` flag writes `.claude/mcp.json` automatically
 
 **What didn't:**
+- `mcp` SDK 1.x changed `stdio_server` from a coroutine to a context manager — original scaffolded code used the old API and needed fixing
+- No `pip` alias on macOS — must use `pip3`
+- `flagged/` directory was referenced in code but not created in the scaffold
 
 **Surprise findings:**
+- MCP SDK 1.x is significantly different from 0.x — the server now uses `stdio_server()` as an async context manager yielding `(read_stream, write_stream)` and calls `server.run()` directly
+- Tool logic is fully testable without MCP by importing `server.py` and calling `tool_*` functions directly
 
 **Best suited for:**
+- Teams using Claude Code as primary agent
+- When you want structured, type-safe task CRUD instead of raw file access
+- When task querying (filter by score/assignee/label) matters more than zero-setup simplicity
 
 ---
 
