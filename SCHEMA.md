@@ -20,6 +20,7 @@ updated_date: "2026-02-23"
 due_date: "2026-03-01"              # or null
 labels: ["backend", "auth"]
 dependencies: ["TASK-000"]
+blocked_by: null                    # task id or external dep string; required when status=blocked
 source: "[[2026-02-23 Team Sync]]"  # wikilink back to meeting note
 confidence: 0.85                    # extraction confidence; tasks < 0.7 flagged for review
 ---
@@ -56,4 +57,5 @@ todo → in-progress → review → done
 - `id`: Auto-assigned, format `TASK-NNN`, never reused
 - `score`: Recomputed on every `score_tasks.py` run; never manually set
 - `labels`: Lowercase, hyphen-separated, from the project label taxonomy
+- `blocked_by`: Required (non-null) when `status: blocked`; omit or set to `null` otherwise
 - `source`: Must reference an existing file in `meeting-notes/`
