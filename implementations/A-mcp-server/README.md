@@ -11,7 +11,7 @@ server and can create, list, update, and score tasks without reading markdown fi
 cd implementations/A-mcp-server
 
 # Install dependencies
-pip3 install mcp pyyaml
+pip3 install -r requirements.txt
 
 # Start the server (adds it to Claude Code's MCP config)
 python3 server.py --install
@@ -34,22 +34,23 @@ python3 server.py
 
 ```
 A-mcp-server/
-├── tasks/          # One TASK-NNN.md file per task
-├── flagged/        # Low-confidence extractions awaiting review
-├── server.py       # MCP server (run this)
-├── mcp.json        # Claude Code MCP config reference
+├── tasks/           # One TASK-NNN.md file per task
+├── flagged/         # Low-confidence extractions awaiting review
+├── server.py        # MCP server (run this)
+├── mcp.json         # Claude Code MCP config reference
+├── requirements.txt # Python deps: mcp>=1.0.0, pyyaml>=6.0
 └── README.md
 ```
 
 ## Connecting to Claude Code
 
-After running `python server.py --install`, add to your `.claude/mcp.json`:
+After running `python3 server.py --install`, add to your `.claude/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "notes-to-tasks": {
-      "command": "python",
+      "command": "python3",
       "args": ["/absolute/path/to/implementations/A-mcp-server/server.py"]
     }
   }
