@@ -20,13 +20,13 @@ Fill in after testing. Score each criterion 1–5.
 
 | Criterion | A (MCP Server) | B (Pure Markdown) | C (Backlog.md) |
 |---|---|---|---|
-| Setup time | 3 | 5 | |
-| Agent compatibility | 4 | 5 | |
-| Task query speed | 5 | 3 | |
-| Schema integrity | 5 | 4 | |
-| Team friction | 3 | 5 | |
-| Observability | 3 | 5 | |
-| **Weighted total** | **3.85** | **4.50** | |
+| Setup time | 3 | 5 | 2 |
+| Agent compatibility | 4 | 5 | 4 |
+| Task query speed | 5 | 3 | 4 |
+| Schema integrity | 5 | 4 | 3 |
+| Team friction | 3 | 5 | 3 |
+| Observability | 3 | 5 | 4 |
+| **Weighted total** | **3.85** | **4.50** | **3.35** |
 
 ## Observations
 
@@ -83,24 +83,62 @@ Fill in after testing. Score each criterion 1–5.
 ### Implementation C — Backlog.md
 
 **What worked:**
+- `backlog init --defaults --agent-instructions none` initializes non-interactively ✅
+- `importer.py` correctly routes through the backlog CLI when available, falling back to direct file writes when not ✅
+- 10 tasks imported from two meeting notes; 1 low-confidence item correctly skipped ✅
+- `scorer.py --list` shows tasks ranked by score ✅
+- `backlog task list --plain` gives a clean status-grouped view ✅
+- `backlog mcp start` exposes native MCP tools for Claude Code integration ✅
+- Score fields (`score`, `urgency`, `impact`, `effort`) written to Backlog.md frontmatter alongside native fields without conflicting ✅
 
 **What didn't:**
+- `backlog task create` CLI API changed in v1.x: title is now a positional arg (not `--title`), `--due` flag doesn't exist (due date must go in description), labels use `-l`/`--labels` with comma separation. The scaffolded `importer.py` used the old API and needed fixing.
+- `backlog init` is interactive by default — requires `--defaults` flag for scripted use
+- No native due-date field in Backlog.md tasks; we embed it in the description string, losing queryability
+- Schema mismatch: Backlog.md uses `To Do`/`In Progress`/`Done` statuses vs SCHEMA.md's `todo`/`in-progress`/`done` — scorer has to handle both
 
 **Surprise findings:**
+- Backlog.md task files have YAML frontmatter but the scorer's `render_frontmatter` writes fields that Backlog.md doesn't know about (`score`, `urgency` etc.) — this works fine since Backlog ignores unknown fields, but it's not "native"
+- `backlog board` opens a browser Kanban — nice for teams but not useful in a CI/headless environment
+- The MCP server uses `backlog mcp start --cwd <path>` (not just `backlog mcp`)
 
 **Best suited for:**
+- Teams that want a visual Kanban board as the primary interface
+- Mixed human + AI workflows where humans use the board and agents use MCP
+- Teams already using Backlog.md who want to layer AI scoring on top
 
 ---
 
 ## Recommendation
 
-_Fill in after completing evaluation._
-
-**Recommended implementation:**
+**Recommended implementation: B (Pure Markdown)** — weighted score 4.50/5
 
 **Reasoning:**
+- Zero setup — works immediately with any agent (Claude Code, Gemini CLI, Pi, Codex) and any editor
+- Tasks are plain markdown files: readable, auditable, portable, Obsidian-compatible
+- The highest agent compatibility score: no MCP dependency, no Node.js dependency
+- `daily-brief.py` gives a clean priority view without needing a running server
+- For small teams (1–15), the lack of structured queries is not a bottleneck
 
-**Migration path (if switching from B to A or C):**
+**When to choose A instead (MCP Server):**
+- Your team works primarily through Claude Code
+- You want typed tool calls instead of raw file access
+- You need server-side filtering (by score range, assignee, label) without reading all files
+
+**When to choose C instead (Backlog.md):**
+- Your team wants a visual Kanban board as the primary interface
+- You're already using Backlog.md
+- You have a mixed human + AI workflow
+
+**Migration path (B → A):**
+1. Run `python3 implementations/A-mcp-server/server.py --install`
+2. Move task files from `B-pure-markdown/tasks/` to `A-mcp-server/tasks/`
+3. Restart Claude Code — MCP tools are now available
+
+**Migration path (B → C):**
+1. `npm install -g backlog.md`
+2. `cd implementations/C-backlog-md && backlog init "project" --defaults --agent-instructions none`
+3. `python3 importer.py ../../meeting-notes/<file>.md` for each existing meeting note
 
 ---
 

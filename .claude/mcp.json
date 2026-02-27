@@ -5,6 +5,16 @@
       "args": [
         "/Users/julienmika/Code/notes-to-tasks/implementations/A-mcp-server/server.py"
       ]
+    },
+    "backlog": {
+      "command": "backlog",
+      "args": [
+        "mcp",
+        "start",
+        "--cwd",
+        "/Users/julienmika/Code/notes-to-tasks/implementations/C-backlog-md"
+      ],
+      "cwd": "/Users/julienmika/Code/notes-to-tasks/implementations/C-backlog-md"
     }
   }
 }

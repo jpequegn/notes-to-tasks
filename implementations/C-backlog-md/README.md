@@ -11,12 +11,12 @@ format, and provides an importer to pull tasks from meeting notes.
 ## Prerequisites
 
 ```bash
-# Install Backlog.md CLI
+# Install Backlog.md CLI (requires Node.js / npm)
 npm install -g backlog.md
 
-# Initialize in this directory
+# Initialize in this directory (one-time, non-interactive)
 cd implementations/C-backlog-md
-backlog init
+backlog init "notes-to-tasks-C" --defaults --agent-instructions none
 ```
 
 ## Setup
@@ -27,13 +27,16 @@ cd implementations/C-backlog-md
 # Import tasks from a meeting note
 python3 importer.py ../../meeting-notes/your-note.md
 
-# Score all tasks (adds/updates score in frontmatter)
+# Score all tasks (adds score/urgency/impact/effort to frontmatter)
 python3 scorer.py
 
-# See priorities
+# See priorities ranked by score
 python3 scorer.py --list
 
-# Open Kanban UI
+# List tasks in plain text (grouped by status)
+backlog task list --plain
+
+# Open Kanban board (opens browser)
 backlog board
 ```
 
@@ -49,21 +52,22 @@ C-backlog-md/
 
 ## MCP integration
 
-Backlog.md ships with an MCP server. Add to Claude Code:
+Backlog.md ships with an MCP server. Add to `.claude/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "backlog": {
       "command": "backlog",
-      "args": ["mcp"],
-      "cwd": "/path/to/implementations/C-backlog-md"
+      "args": ["mcp", "start", "--cwd", "/absolute/path/to/implementations/C-backlog-md"],
+      "cwd": "/absolute/path/to/implementations/C-backlog-md"
     }
   }
 }
 ```
 
-Claude Code can then use Backlog.md's native MCP tools alongside the AI scoring layer.
+Claude Code can then use Backlog.md's native MCP tools (`list_tasks`, `create_task`, etc.)
+alongside the AI scoring layer (`python3 scorer.py`).
 
 ## Scoring
 
