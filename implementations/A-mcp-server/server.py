@@ -126,7 +126,7 @@ def write_task_file(task_id: str, fm: dict, body: str = "") -> Path:
     path = TASKS_DIR / f"{task_id}.md"
     title = fm.get("title", task_id)
     if not body:
-        body = f"# {title}\n\n> Run `python scripts/score_tasks.py` to compute final score.\n\n## Context\n\n## Acceptance criteria\n\n## Notes\n"
+        body = f"# {title}\n\n> Run `python3 scripts/score_tasks.py` to compute final score.\n\n## Context\n\n## Acceptance criteria\n\n## Notes\n"
     content = f"---\n{render_frontmatter(fm)}\n---\n\n{body}"
     path.write_text(content, encoding="utf-8")
     return path

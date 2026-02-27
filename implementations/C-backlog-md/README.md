@@ -25,13 +25,13 @@ backlog init
 cd implementations/C-backlog-md
 
 # Import tasks from a meeting note
-python importer.py ../../meeting-notes/your-note.md
+python3 importer.py ../../meeting-notes/your-note.md
 
 # Score all tasks (adds/updates score in frontmatter)
-python scorer.py
+python3 scorer.py
 
 # See priorities
-python scorer.py --list
+python3 scorer.py --list
 
 # Open Kanban UI
 backlog board

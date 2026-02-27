@@ -22,7 +22,7 @@ When you finish a task:
 ## Creating tasks from meeting notes
 
 ```bash
-python scripts/extract_tasks.py meeting-notes/<file>.md
+python3 scripts/extract_tasks.py meeting-notes/<file>.md
 ```
 
 Review `flagged/` directory for low-confidence extractions before promoting to the task queue.
