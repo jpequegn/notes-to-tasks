@@ -1,7 +1,7 @@
 ---
 id: "TASK-008"
 title: "Wire ANTHROPIC_API_KEY into score_tasks.py LLM path"
-status: "todo"
+status: todo
 assignee: "@julien"
 priority: "medium"
 score: 3.6

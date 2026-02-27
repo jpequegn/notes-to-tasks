@@ -1,7 +1,7 @@
 ---
 id: "TASK-007"
 title: "Provision Anthropic API key and add to .env file"
-status: "todo"
+status: todo
 assignee: "@alice"
 priority: "medium"
 score: 4.4
