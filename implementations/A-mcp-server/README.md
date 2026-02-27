@@ -64,6 +64,11 @@ After running `python3 server.py --install`, add to your `.claude/mcp.json`:
 - Scoring runs in-server, not as a separate script
 - Lays groundwork for syncing to GitHub Issues MCP (official MCP server exists)
 
+## Full usage guide
+
+See [`docs/USAGE.md — Implementation A`](../../docs/USAGE.md#implementation-a--mcp-server) for
+detailed create / update / delete examples and vault insight prompt templates.
+
 ## Trade-offs vs other implementations
 
 - **More setup** than B (pure markdown)

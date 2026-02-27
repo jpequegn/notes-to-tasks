@@ -48,6 +48,11 @@ workflow. From there it can:
 - **Portable** — works with Claude Code, Gemini CLI, Cursor, VS Code, Obsidian
 - **The "vibe coding" pattern** — tasks become executable prompts for AI agents
 
+## Full usage guide
+
+See [`docs/USAGE.md — Implementation B`](../../docs/USAGE.md#implementation-b--pure-markdown) for
+detailed create / update / delete examples and vault insight prompt templates.
+
 ## Trade-offs vs other implementations
 
 - **No typed tool calls** — agents must parse frontmatter themselves
