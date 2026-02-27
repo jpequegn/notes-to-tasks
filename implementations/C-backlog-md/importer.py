@@ -46,20 +46,25 @@ def backlog_cli_available() -> bool:
 
 def create_backlog_task(title: str, assignee: str, due_date: str | None,
                         labels: list, source: str, dry_run: bool) -> bool:
-    """Create a task using the backlog CLI."""
-    cmd = ["backlog", "task", "create", "--title", title]
+    """Create a task using the backlog CLI (v1.x API).
+
+    backlog task create <title> [options]
+    - title is a positional arg (not --title)
+    - labels are comma-separated via -l
+    - no native --due flag; due date goes in description
+    """
+    description_parts = [f"Extracted from {source}"]
+    if due_date and due_date not in ("null", None, ""):
+        description_parts.append(f"Due: {due_date}")
+
+    cmd = ["backlog", "task", "create", title,
+           "--description", " | ".join(description_parts),
+           "--plain"]
 
     if assignee and assignee != "unassigned":
         cmd += ["--assignee", assignee.lstrip("@")]
-    if due_date and due_date not in ("null", None, ""):
-        cmd += ["--due", str(due_date)]
     if labels:
-        for label in labels:
-            cmd += ["--label", label]
-
-    # Add source as a note in the description
-    description = f"Extracted from {source}"
-    cmd += ["--description", description]
+        cmd += ["--labels", ",".join(labels)]
 
     if dry_run:
         print(f"  [DRY RUN] Would run: {' '.join(cmd)}")
@@ -192,7 +197,7 @@ def main():
 
     print(f"\nDone: {written} imported, {flagged} skipped (low confidence)")
     if not args.dry_run and written:
-        print("\nNext step: python scorer.py")
+        print("\nNext step: python3 scorer.py")
 
 
 if __name__ == "__main__":
