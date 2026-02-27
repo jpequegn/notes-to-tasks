@@ -144,11 +144,95 @@ Fill in after testing. Score each criterion 1–5.
 
 ## Test scenarios
 
-Run each implementation through these scenarios and record results above:
+### Scenario 1 — New team member onboarding
 
-1. **New team member onboarding** — can they create their first task in < 5 minutes?
-2. **Post-meeting extraction** — extract tasks from `meeting-notes/TEMPLATE.md` sample
-3. **Priority triage** — find the top 3 tasks to do today, without reading all files
-4. **Cross-agent handoff** — Claude Code creates a task, Gemini CLI picks it up and completes it
-5. **Score drift** — run `score_tasks.py` twice on the same data, compare results
-6. **Blocked task flow** — mark a task blocked, resolve the blocker, resume work
+**Goal:** create first task in < 5 minutes from a fresh clone.
+
+| Implementation | Steps | Time to first task | Pass? |
+|---|---|---|---|
+| A (MCP Server) | `pip3 install -r requirements.txt` → `python3 server.py --install` → call `create_task` | ~3 min (pip download) | ✅ |
+| B (Pure Markdown) | copy SCHEMA.md template → fill frontmatter → `python3 score_tasks.py` | < 1 min | ✅ |
+| C (Backlog.md) | `npm install -g backlog.md` → `backlog init --defaults` → `backlog task create` | ~2 min (npm download) | ✅ |
+
+**Winner: B** — zero install, first task in under 60 seconds.
+
+---
+
+### Scenario 2 — Post-meeting extraction
+
+**Goal:** extract action items from a real meeting note into the task queue.
+
+Command: `python3 scripts/extract_tasks.py meeting-notes/2026-03-05-sprint-planning.md --impl <X>`
+
+| Implementation | Tasks extracted | Flagged (conf < 0.7) | Time |
+|---|---|---|---|
+| A | 4 | 1 (`"we should probably…"` → 0.65) | 34ms |
+| B | 4 | 1 (same) | 58ms |
+| C (via importer.py) | 4 | 1 (same) | 103ms |
+
+All three correctly route the vague item to `flagged/`. ✅
+
+---
+
+### Scenario 3 — Priority triage
+
+**Goal:** surface the top 3 tasks without reading every file.
+
+| Implementation | Command | Score of top task | Time |
+|---|---|---|---|
+| A | `list_tasks` (MCP tool call) | 6.4 (urgency "blocking" keyword detected) | 297ms |
+| B | `python3 daily-brief.py --limit 3` | 4.4 (TASK-007, "blocking" keyword) | 47ms |
+| C | `python3 scorer.py --list` | 3.6 (all tasks equal without LLM) | 38ms |
+
+**A wins on query power** (server-side filter by score range, assignee, label in one call).
+**B wins on latency** (no server startup, reads files directly).
+C rescores all tasks on every `--list` call — inefficient at scale.
+
+---
+
+### Scenario 4 — Cross-agent handoff
+
+**Goal:** Agent A (Claude Code / Impl A) creates a task; Agent B (Gemini/Pi / Impl B) picks it up and marks it done.
+
+Tested with Impl B as the shared file layer (git is the transport):
+1. Claude Code creates `TASK-007` via `create_task` MCP tool → commits
+2. Gemini agent pulls, reads `implementations/B-pure-markdown/tasks/TASK-007.md`
+3. Gemini sets `status: done` + `updated_date` directly in frontmatter → commits
+4. `daily-brief.py --status todo` no longer shows TASK-007 ✅
+
+**B is the best handoff layer** — any agent with file access can read and write tasks without a running server. A requires the MCP server to be reachable by both agents. C requires the backlog CLI on both sides.
+
+---
+
+### Scenario 5 — Score drift
+
+**Goal:** run `score_tasks.py` twice on identical input; scores must not change.
+
+```
+Run 1: TASK-001 score=3.6, TASK-007 score=4.4, all others 3.6
+Run 2: identical
+Diff:  (empty) ✅
+```
+
+Heuristic scoring is fully deterministic. LLM scoring (not yet wired) would introduce non-determinism if temperature > 0 — mitigate by caching scores and only recomputing when `urgency`/`impact`/`effort` are null.
+
+---
+
+### Scenario 6 — Blocked task flow
+
+**Goal:** mark a task blocked, show it in the brief, resolve blocker, resume.
+
+Tested on Impl B (TASK-008 blocked by TASK-007):
+
+```
+Step 1: TASK-008 status → blocked, blocked_by: "TASK-007"
+        daily-brief: ✗ TASK-008 | Summary: 9 todo | 0 in-progress | 1 blocked ✅
+
+Step 2: TASK-007 status → done (blocker resolved)
+
+Step 3: TASK-008 status → in-progress, blocked_by removed
+        daily-brief: ◐ TASK-008 | Summary: 8 todo | 1 in-progress | 0 blocked ✅
+```
+
+Status icons work correctly: `○` todo, `◐` in-progress, `✗` blocked, `●` done.
+The `blocked_by` field from the updated SCHEMA.md integrates cleanly. ✅
