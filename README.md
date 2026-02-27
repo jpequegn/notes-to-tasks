@@ -37,13 +37,13 @@ Try **C (Backlog.md)** if your team wants a Kanban UI alongside AI access.
 
 ```bash
 # Extract tasks from a meeting note
-python scripts/extract_tasks.py meeting-notes/your-note.md
+python3 scripts/extract_tasks.py meeting-notes/your-note.md
 
 # Score all tasks
-python scripts/score_tasks.py --dry-run
+python3 scripts/score_tasks.py --dry-run
 
 # See today's priorities (Implementation B)
-python implementations/B-pure-markdown/daily-brief.py
+python3 implementations/B-pure-markdown/daily-brief.py
 ```
 
 ## Evaluation

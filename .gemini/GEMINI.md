@@ -27,13 +27,13 @@ scripts/score_tasks.py   # Scoring engine
 
 ```bash
 # Extract tasks from a meeting note
-python scripts/extract_tasks.py meeting-notes/<file>.md
+python3 scripts/extract_tasks.py meeting-notes/<file>.md
 
 # Score tasks
-python scripts/score_tasks.py
+python3 scripts/score_tasks.py
 
 # See priorities (Implementation B)
-python implementations/B-pure-markdown/daily-brief.py
+python3 implementations/B-pure-markdown/daily-brief.py
 ```
 
 ## When reading tasks

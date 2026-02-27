@@ -11,13 +11,13 @@ No setup required. Just start using it.
 
 ```bash
 # Extract tasks from a meeting note
-python ../../scripts/extract_tasks.py ../../meeting-notes/your-note.md --impl B
+python3 ../../scripts/extract_tasks.py ../../meeting-notes/your-note.md --impl B
 
 # Score tasks
-python ../../scripts/score_tasks.py --impl B
+python3 ../../scripts/score_tasks.py --impl B
 
 # See today's priorities
-python daily-brief.py
+python3 daily-brief.py
 ```
 
 ## Directory structure

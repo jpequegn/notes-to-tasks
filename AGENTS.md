@@ -39,7 +39,7 @@ See `meeting-notes/TEMPLATE.md`. Key sections:
 ## Extracting tasks from a meeting note
 
 ```bash
-python scripts/extract_tasks.py meeting-notes/<file>.md
+python3 scripts/extract_tasks.py meeting-notes/<file>.md
 ```
 
 Tasks with `confidence < 0.7` go to `flagged/` — review before promoting.
@@ -47,8 +47,8 @@ Tasks with `confidence < 0.7` go to `flagged/` — review before promoting.
 ## Scoring tasks
 
 ```bash
-python scripts/score_tasks.py              # score all tasks in active implementation
-python scripts/score_tasks.py --dry-run   # preview scores without writing
+python3 scripts/score_tasks.py              # score all tasks in active implementation
+python3 scripts/score_tasks.py --dry-run   # preview scores without writing
 ```
 
 ## Agent-specific config

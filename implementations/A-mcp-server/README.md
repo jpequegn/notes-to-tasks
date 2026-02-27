@@ -11,13 +11,13 @@ server and can create, list, update, and score tasks without reading markdown fi
 cd implementations/A-mcp-server
 
 # Install dependencies
-pip install mcp pyyaml
+pip3 install mcp pyyaml
 
 # Start the server (adds it to Claude Code's MCP config)
-python server.py --install
+python3 server.py --install
 
 # Or run directly
-python server.py
+python3 server.py
 ```
 
 ## MCP tools

@@ -12,7 +12,7 @@ Read `../../SCHEMA.md` for the canonical frontmatter spec.
 
 ```bash
 # List all todo tasks, sorted by score
-python daily-brief.py
+python3 daily-brief.py
 
 # Or read task files directly
 ls tasks/
@@ -67,7 +67,7 @@ Then run: `python ../../scripts/score_tasks.py --impl B`
 ## Extracting tasks from a meeting note
 
 ```bash
-python ../../scripts/extract_tasks.py ../../meeting-notes/YYYY-MM-DD-name.md --impl B
+python3 ../../scripts/extract_tasks.py ../../meeting-notes/YYYY-MM-DD-name.md --impl B
 ```
 
 Review `../../flagged/` for tasks with confidence < 0.7 before promoting them.
@@ -75,8 +75,8 @@ Review `../../flagged/` for tasks with confidence < 0.7 before promoting them.
 ## Scoring
 
 ```bash
-python ../../scripts/score_tasks.py --impl B          # score all tasks
-python ../../scripts/score_tasks.py --impl B --dry-run # preview only
+python3 ../../scripts/score_tasks.py --impl B          # score all tasks
+python3 ../../scripts/score_tasks.py --impl B --dry-run # preview only
 ```
 
 Score formula: `(urgency × 0.4) + (impact × 0.4) - (effort × 0.2)`

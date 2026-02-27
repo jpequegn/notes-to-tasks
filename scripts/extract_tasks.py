@@ -3,9 +3,9 @@
 extract_tasks.py — Meeting note → structured task files
 
 Usage:
-    python scripts/extract_tasks.py meeting-notes/2026-02-26-team-sync.md
-    python scripts/extract_tasks.py meeting-notes/2026-02-26-team-sync.md --impl B
-    python scripts/extract_tasks.py meeting-notes/2026-02-26-team-sync.md --dry-run
+    python3 scripts/extract_tasks.py meeting-notes/2026-02-26-team-sync.md
+    python3 scripts/extract_tasks.py meeting-notes/2026-02-26-team-sync.md --impl B
+    python3 scripts/extract_tasks.py meeting-notes/2026-02-26-team-sync.md --dry-run
 """
 
 import argparse
@@ -190,7 +190,7 @@ confidence: {fields['confidence']}
 
 # {fields['title']}
 
-> Extracted from {fields['source']}. Run `python scripts/score_tasks.py` to compute final score.
+> Extracted from {fields['source']}. Run `python3 scripts/score_tasks.py` to compute final score.
 
 ## Context
 
@@ -259,7 +259,7 @@ def main():
     if flagged_count:
         print(f"Review flagged tasks in: {FLAGGED_DIR}")
     if not args.dry_run and written:
-        print("\nNext step: python scripts/score_tasks.py")
+        print("\nNext step: python3 scripts/score_tasks.py")
 
 
 if __name__ == "__main__":

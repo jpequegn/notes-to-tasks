@@ -33,7 +33,7 @@ Run scoring after any task changes: `python scripts/score_tasks.py`
 ## Extraction pipeline
 
 ```bash
-python scripts/extract_tasks.py meeting-notes/<file>.md
+python3 scripts/extract_tasks.py meeting-notes/<file>.md
 # → writes task files to implementations/<active>/tasks/
 # → writes low-confidence tasks to flagged/
 ```

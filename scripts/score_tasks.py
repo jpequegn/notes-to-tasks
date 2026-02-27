@@ -9,10 +9,10 @@ Computes score = (urgency × 0.4) + (impact × 0.4) - (effort × 0.2)
   If no LLM key available, falls back to heuristic scoring.
 
 Usage:
-    python scripts/score_tasks.py                    # score all implementations
-    python scripts/score_tasks.py --impl B           # score only Implementation B
-    python scripts/score_tasks.py --dry-run          # preview scores without writing
-    python scripts/score_tasks.py --no-llm           # rule-based only, no LLM calls
+    python3 scripts/score_tasks.py                    # score all implementations
+    python3 scripts/score_tasks.py --impl B           # score only Implementation B
+    python3 scripts/score_tasks.py --dry-run          # preview scores without writing
+    python3 scripts/score_tasks.py --no-llm           # rule-based only, no LLM calls
 """
 
 import argparse

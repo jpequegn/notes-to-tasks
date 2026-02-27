@@ -42,14 +42,14 @@ Tasks live in `implementations/B-pure-markdown/tasks/`. Each file = one task.
 ```bash
 # Use the schema from SCHEMA.md, write to tasks/TASK-NNN.md
 # Then run scoring:
-python scripts/score_tasks.py
+python3 scripts/score_tasks.py
 ```
 
 **To complete a task:** Set `status: done` and `updated_date` in the frontmatter.
 
 **To see today's priorities:**
 ```bash
-python implementations/B-pure-markdown/daily-brief.py
+python3 implementations/B-pure-markdown/daily-brief.py
 ```
 
 ## Extraction workflow
@@ -60,13 +60,13 @@ cp meeting-notes/TEMPLATE.md meeting-notes/$(date +%Y-%m-%d)-meeting-name.md
 # ... fill it in ...
 
 # 2. Extract tasks
-python scripts/extract_tasks.py meeting-notes/$(date +%Y-%m-%d)-meeting-name.md
+python3 scripts/extract_tasks.py meeting-notes/$(date +%Y-%m-%d)-meeting-name.md
 
 # 3. Review flagged tasks (confidence < 0.7)
 ls flagged/
 
 # 4. Score everything
-python scripts/score_tasks.py
+python3 scripts/score_tasks.py
 ```
 
 ## Quality rules
