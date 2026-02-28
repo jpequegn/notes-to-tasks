@@ -29,10 +29,11 @@ FLAGGED_DIR = REPO_ROOT / "flagged"
 CONFIDENCE_THRESHOLD = 0.7
 
 # Keywords that increase urgency score
-URGENCY_KEYWORDS = [
-    "asap", "urgent", "blocking", "blocked", "critical", "immediately",
-    "today", "eod", "end of day", "high priority", "p0", "p1",
-]
+URGENCY_KEYWORDS = {
+    "blocking": 3, "blocked": 3, "critical": 3, "p0": 3,
+    "asap": 2, "urgent": 2, "immediately": 2, "eod": 2, "end of day": 2, "p1": 2,
+    "high priority": 1, "soon": 1,
+}
 
 
 def parse_args():
@@ -123,14 +124,11 @@ def parse_action_item(raw: str, source_file: str) -> dict:
     if len(title) > 10:
         confidence += 0.15
 
-    # Urgency from keywords
+    # Urgency from keywords — accumulate all matches
     urgency = 5
-    for kw in URGENCY_KEYWORDS:
+    for kw, boost in URGENCY_KEYWORDS.items():
         if kw in lower:
-            urgency = min(10, urgency + 2)
-            break
-    if due_date and due_date.lower() in ("today", "eod", "end of day"):
-        urgency = min(10, urgency + 2)
+            urgency = min(10, urgency + boost)
 
     source_stem = Path(source_file).stem
     wikilink = f"[[{source_stem}]]"

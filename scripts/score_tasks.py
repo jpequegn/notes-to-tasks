@@ -134,25 +134,30 @@ def render_frontmatter(fm: dict) -> str:
     return "\n".join(lines)
 
 
-def compute_urgency(fm: dict) -> int:
-    """Rule-based urgency: deadline proximity + keyword detection."""
-    urgency = fm.get("urgency")
-    if isinstance(urgency, int) and urgency > 0:
-        return urgency  # already set (e.g. by extract_tasks.py)
+def compute_urgency(fm: dict, body: str = "") -> int:
+    """Rule-based urgency: keyword detection + deadline proximity.
 
-    score = 5  # base
+    Uses extracted urgency from frontmatter as the keyword baseline (set during
+    extraction against the full raw action item text), then always applies
+    deadline proximity on top — the early-return pattern previously skipped this.
+    """
+    stored = fm.get("urgency")
+    if isinstance(stored, int) and stored > 0:
+        # Use the extraction-time keyword score as the starting point.
+        # It was computed against the full raw action item (including trailing
+        # "blocking X" / "depends on Y" annotations that don't survive into title).
+        score = stored
+    else:
+        score = 5  # base
+        searchable = " ".join([
+            str(fm.get("title", "")),
+            body,
+        ]).lower()
+        for kw, boost in URGENCY_KEYWORDS.items():
+            if kw in searchable:
+                score = min(10, score + boost)
 
-    # Keyword detection across title + any text fields
-    searchable = " ".join([
-        str(fm.get("title", "")),
-        str(fm.get("notes", "")),
-    ]).lower()
-
-    for kw, boost in URGENCY_KEYWORDS.items():
-        if kw in searchable:
-            score = min(10, score + boost)
-
-    # Deadline proximity
+    # Always apply deadline proximity — this was the bug.
     due = fm.get("due_date")
     if due and due not in ("null", None, ""):
         try:
@@ -169,7 +174,7 @@ def compute_urgency(fm: dict) -> int:
         except ValueError:
             pass
 
-    return score
+    return min(10, score)
 
 
 def heuristic_impact_effort(fm: dict) -> tuple[int, int]:
@@ -211,28 +216,75 @@ def heuristic_impact_effort(fm: dict) -> tuple[int, int]:
     return impact, effort
 
 
-def llm_score_impact_effort(fm: dict) -> tuple[int, int] | None:
+def llm_score_impact_effort(fm: dict, body: str = "") -> tuple[int, int] | None:
     """
-    LLM-based scoring using rubric prompts.
-    Returns (impact, effort) or None if LLM unavailable.
+    Score impact and effort via Anthropic claude-haiku-4-5.
+    Returns (impact, effort) or None if unavailable.
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    import json as _json
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return None
 
-    impact_prompt_path = PROMPTS_DIR / "impact_rubric.md"
-    effort_prompt_path = PROMPTS_DIR / "effort_rubric.md"
-
-    if not impact_prompt_path.exists() or not effort_prompt_path.exists():
+    try:
+        import anthropic
+    except ImportError:
+        print("  [anthropic not installed — pip install anthropic]")
         return None
 
-    # LLM integration stub — implement with your preferred client
-    # Example with Anthropic:
-    # from anthropic import Anthropic
-    # client = Anthropic()
-    # ...
-    print("  [LLM scoring not yet implemented — using heuristics]")
-    return None
+    impact_rubric = (PROMPTS_DIR / "impact_rubric.md").read_text()
+    effort_rubric = (PROMPTS_DIR / "effort_rubric.md").read_text()
+
+    title = fm.get("title", "")
+    labels = fm.get("labels") or []
+    due_date = fm.get("due_date") or "none"
+    source = fm.get("source") or "unknown"
+    context = body[:600].strip() if body else "none"
+
+    prompt = f"""Score the following task for impact and effort. Be precise — use the full 1–10 range.
+
+Task title: {title}
+Labels: {", ".join(labels) if labels else "none"}
+Due date: {due_date}
+Source: {source}
+Body context: {context}
+
+---
+{impact_rubric}
+
+---
+{effort_rubric}
+
+---
+Return ONLY a JSON object, no other text:
+{{"impact": <integer 1-10>, "effort": <integer 1-10>, "impact_rationale": "<one sentence>", "effort_rationale": "<one sentence>"}}"""
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        block = message.content[0]
+        if not hasattr(block, "text"):
+            return None
+        text = block.text.strip()  # type: ignore[union-attr]
+        m = re.search(r"\{.*\}", text, re.DOTALL)
+        if not m:
+            return None
+        data = _json.loads(m.group())
+        impact = max(1, min(10, int(data["impact"])))
+        effort = max(1, min(10, int(data["effort"])))
+        impact_r = data.get("impact_rationale", "")
+        effort_r = data.get("effort_rationale", "")
+        print(f"  [LLM] impact={impact} ({impact_r[:60]})")
+        print(f"  [LLM] effort={effort} ({effort_r[:60]})")
+        return impact, effort
+    except Exception as e:
+        print(f"  [LLM error: {e}]")
+        return None
 
 
 def compute_score(urgency: int, impact: int, effort: int) -> float:
@@ -251,13 +303,13 @@ def score_task_file(path: Path, dry_run: bool, no_llm: bool) -> dict:
     if not fm:
         return {"path": path, "status": "skipped", "reason": "no frontmatter"}
 
-    urgency = compute_urgency(fm)
+    urgency = compute_urgency(fm, body)
 
     impact = fm.get("impact")
     effort = fm.get("effort")
 
     if (impact is None or effort is None) and not no_llm:
-        llm_result = llm_score_impact_effort(fm)
+        llm_result = llm_score_impact_effort(fm, body)
         if llm_result:
             impact, effort = llm_result
 
